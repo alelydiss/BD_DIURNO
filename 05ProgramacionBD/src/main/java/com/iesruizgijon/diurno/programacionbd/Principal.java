@@ -6,7 +6,9 @@ package com.iesruizgijon.diurno.programacionbd;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,10 +25,18 @@ public class Principal {
         final String nameDB = "northwind";
         final String URL = "jdbc:mysql://localhost:3306/";
         
-        BD bd = new BD(nameDB, USER, PASS);
+        BD bd = new BD(USER, PASS, nameDB);
         
         bd.conecta();
+        
+       // bd.consultaPrueba();
+        System.out.println("--------------------------------------------------");
+        bd.consultaPrueba2();
+        
         bd.desconecta();
         
+        
     }
+
 }
+
