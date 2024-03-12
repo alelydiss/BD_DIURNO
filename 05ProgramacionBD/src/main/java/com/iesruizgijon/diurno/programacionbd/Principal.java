@@ -29,11 +29,14 @@ public class Principal {
         
         bd.conecta();
         
-       // bd.consultaPrueba();
+        bd.consultaPrueba();
         System.out.println("--------------------------------------------------");
         bd.consultaPrueba2();
+        System.out.println("--------------------------------------------------");
+        bd.consultaPrueba3();
         
         bd.desconecta();
+        
         
         
     }

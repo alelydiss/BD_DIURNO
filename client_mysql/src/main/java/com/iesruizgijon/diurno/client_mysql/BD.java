@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.iesruizgijon.diurno.programacionbd;
+package com.iesruizgijon.diurno.client_mysql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,26 +32,29 @@ public class BD {
         this.nameDB = nameDB;
     }
 
-    public void conecta() {
+     public boolean Conecta() {
+
+        boolean conectado = false;
+        
         try {
             conexion = DriverManager.getConnection(URL + nameDB, USER, PASS);
-            System.out.println("Conexion establecida");
+            conectado = true;
+           
         } catch (SQLException ex) {
-            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(principal.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Connection conexion;
+        
+        return conectado;
     }
 
-    public void desconecta() {
+    public void Desconecta() {
         try {
-            if (conexion != null && !conexion.isClosed()) {
+            if (conexion != null) {
                 conexion.close();
-                System.out.println("Connection closed.");
             }
         } catch (SQLException ex) {
             Logger.getLogger(BD.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     public void consultaPrueba() {
@@ -75,26 +79,26 @@ public class BD {
         } catch (SQLException ex) {
             Logger.getLogger(BD.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
-    /*Crea el método consultaPrueba2 en la que aparezcan los nombres de los clientes 
-    concatenados apellidos-nombre con los pedidos realizados (2 campos)*/
+    /**
+     *
+     */
     public void consultaPrueba2() {
-        String nombre;
-        String numeroPedido;
 
+        String nombre;
+        int pedido;
+        final String consulta
+                = "select concat_ws(\"-\", last_name, first_name) as\n" + "nombre, orders.id as numeroPedido from customers\n" + "inner join orders on customers.id =\n" + "orders.customer_id order by nombre,\n" + "numeroPedido;\n";
         try {
+
+            //ResultSet resultado = conexion.createStatement().executeQuery(consulta);
             Statement sentencia = conexion.createStatement();
-            ResultSet resultado = sentencia.executeQuery("SELECT DISTINCT CONCAT(c.last_name, '-', c.first_name) AS nombre,o.id AS numeroPedido\n"
-                    + "FROM customers c\n"
-                    + "JOIN orders o ON c.id = o.customer_id limit 10");
+            ResultSet resultado = sentencia.executeQuery(consulta);
             while (resultado.next()) {
                 nombre = resultado.getString("nombre");
-                numeroPedido = resultado.getString("NumeroPedido");
-
-                System.out.println("Nombre " + nombre + " -- Numero de pedido: " + numeroPedido);
-
+                pedido = resultado.getInt("numeroPedido");
+                System.out.println("Nombre: " + nombre + " numero pedido: " + pedido);
             }
             resultado.close();
             sentencia.close();
@@ -116,31 +120,23 @@ public class BD {
             Statement statement = conexion.createStatement();
             ResultSet resultset = statement.executeQuery("SELECT * FROM " + nombre);
             ResultSetMetaData metadatos = resultset.getMetaData();
+
             n_columnas = metadatos.getColumnCount();
             columnas = new String[n_columnas];
 
             for (i = 1; i <= n_columnas; i++) {
-
                 columnas[i - 1] = metadatos.getColumnName(i);
-
             }
-
         } catch (SQLException ex) {
 
             Logger.getLogger(BD.class.getName()).log(Level.SEVERE, null, ex);
-
         }
-
         return columnas;
-
     }
     
-public String [] consultaPrueba3() {
-   
-
+    public void getDataBaseNames(){
+        
         try {
-
-            //He puesto una bd que debe existir siempre            
 
                   Statement stmt = conexion.createStatement();
 
@@ -163,6 +159,38 @@ public String [] consultaPrueba3() {
             Logger.getLogger(BD.class.getName()).log(Level.SEVERE, null, ex);
 
         }
-        return null;
+
     }
+
+    public ArrayList<String> getQuery(String consulta){
+        
+        ArrayList<String> tabla = new ArrayList<>();
+        String fila = new String();
+        
+        
+        try {
+            Statement sentencia = conexion.createStatement();
+            ResultSet resultado = sentencia.executeQuery(consulta);
+            ResultSetMetaData rsmd = resultado.getMetaData();
+            int numeroColumnas = rsmd.getColumnCount();
+            
+            while (resultado.next()) {
+                for (int i = 0; i <numeroColumnas;i++){
+                    fila = fila + " | " + resultado.getString(i+1);
+                }
+               tabla.add(fila);
+               fila = new String();
+
+            }
+            
+            resultado.close();
+            sentencia.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(BD.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return tabla;
+    }
+    
+    
 }
